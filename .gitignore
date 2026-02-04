@@ -46,3 +46,6 @@ logs/
 # Models (.glb, .gltf)
 # Textures (.webp, .png, .jpg)
 # These are intentionally NOT ignored
+
+.vercel
+.env*.local
