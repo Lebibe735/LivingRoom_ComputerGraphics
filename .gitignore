@@ -1,0 +1,48 @@
+﻿# ===============================
+# Node / JS
+# ===============================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===============================
+# Build output
+# ===============================
+dist/
+build/
+.out/
+.cache/
+
+# ===============================
+# Environment files
+# ===============================
+.env
+.env.local
+.env.*.local
+
+# ===============================
+# OS / Editor junk
+# ===============================
+.DS_Store
+Thumbs.db
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.swp
+
+# ===============================
+# Optional logs
+# ===============================
+logs/
+*.log
+
+# ===============================
+# THREE.JS ASSETS (KEEP THESE!)
+# ===============================
+# Models (.glb, .gltf)
+# Textures (.webp, .png, .jpg)
+# These are intentionally NOT ignored
