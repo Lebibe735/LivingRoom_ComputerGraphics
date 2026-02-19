@@ -1,6 +1,6 @@
 # Interactive 3D Living Room – Three.js Project
 
-**Live Demo:** [https://living-room-threejs-lm30735-3242-lebibes-projects-d09c3a3b.vercel.app/](https://living-room-threejs-lm30735-3242-lebibes-projects-d09c3a3b.vercel.app/)
+**Live Demo:** [https://living-room-threejs-pm025frgj-lebibes-projects-d09c3a3b.vercel.app/](https://living-room-threejs-pm025frgj-lebibes-projects-d09c3a3b.vercel.app/)
 
 ## Project Overview
 
@@ -15,14 +15,14 @@ Users can explore the room freely, interact with objects, and trigger animations
 - **TV** – click to turn on/off; plays video texture when on
 - **Fireplace** – toggle fire animation
 - **Light Switch** – turn room lights on/off
-- **Cat** – walking animation with start/stop; leaves footprints on the floor
+- **Cat** – walking animation with start/stop; 
 - **Cup** – animated steam effect
 - **Laptop** – click to open Google
 - **Book** – click to display information about Computer Graphics
 
 ### Draggable Objects
 - **Chair**
-- **Fruit**
+
 
 ### Logic & Behavior
 - Collision detection prevents moving through furniture
