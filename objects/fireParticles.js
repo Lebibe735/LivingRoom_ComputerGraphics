@@ -1,131 +1,151 @@
-
 import * as THREE from 'three';
 
-// Create a soft circular texture for particles
-function createFireTexture() {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
-  const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  gradient.addColorStop(0, 'white');
-  gradient.addColorStop(0.2, 'yellow');
-  gradient.addColorStop(0.5, 'orange');
-  gradient.addColorStop(1, 'rgba(255,0,0,0)');
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-
-  return new THREE.CanvasTexture(canvas);
-}
-
-// Create the fire particle system
+/*
+========================================================
+KRIJIMI I FIRE PARTICLES
+========================================================
+*/
 export function createFireParticles() {
-  const count = 250;
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(count * 3);
-  const velocities = new Float32Array(count * 3);
-  const colors = new Float32Array(count * 3);
-  const sizes = new Float32Array(count);
 
+  const count = 200; // Numri i grimcave që do të krijohen
+  const geometry = new THREE.BufferGeometry(); // BufferGeometry për të ruajtur pozicionet dhe ngjyrat e grimcave
+
+  // Arrays për të ruajtur të dhënat e grimcave
+  const positions = new Float32Array(count * 3); // X, Y, Z për çdo grimcë
+  const velocities = new Float32Array(count * 3); // Shpejtësia e lëvizjes së çdo grimce
+  const colors = new Float32Array(count * 3); // Ngjyra RGB e çdo grimce
+
+  // Loop për të inicializuar çdo grimcë
   for (let i = 0; i < count; i++) {
-    // Random starting position near base, some slightly higher for irregular flame
-    positions[i*3+0] = (Math.random()-0.5)*0.08;
-    positions[i*3+1] = Math.random()*0.05;
-    positions[i*3+2] = (Math.random()-0.5)*0.08;
 
-    // Upward velocity with variation (some rise fast, some slow)
-    velocities[i*3+0] = (Math.random()-0.5)*0.004;
-    velocities[i*3+1] = 0.004 + Math.random()*0.008;
-    velocities[i*3+2] = (Math.random()-0.5)*0.004;
+    const index = i * 3; // Pozicioni fillestar në array për grimcën e i-të
 
-    // Initial color (orange/red)
-    colors[i*3+0] = 1.0;
-    colors[i*3+1] = 0.5 + Math.random()*0.5;
-    colors[i*3+2] = 0.0;
+    // -------------------------------
+    // POZICIONI FILLESTAR
+    // -------------------------------
+    positions[index]     = (Math.random() - 0.5) * 0.15; // X: rreth qendres, -0.075 → 0.075
+    positions[index + 1] = 0;                             // Y: fillon në bazë
+    positions[index + 2] = (Math.random() - 0.5) * 0.15; // Z: rreth qendres
 
-    // Size variation for depth
-    sizes[i] = 0.06 + Math.random()*0.04;
+    // -------------------------------
+    // VELOCITIES (shpejtësia)
+    // -------------------------------
+    velocities[index]     = 0;                            // X nuk lëviz
+    velocities[index + 1] = 0.0002 + Math.random() * 0.005; // Y: ngadalë lart
+    velocities[index + 2] = 0;                            // Z nuk lëviz
+
+    // -------------------------------
+    // NGJYRA FILLESTARE
+    // -------------------------------
+    colors[index]     = 1; // R = 1 (gjithmonë e kuqe)
+    colors[index + 1] = 0; // G = 0 (fillestar)
+    colors[index + 2] = 0; // B = 0 (fillestar)
   }
 
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  // Vendos atributet e BufferGeometry-së
+  geometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(positions, 3)
+  );
 
-  const texture = createFireTexture();
+  geometry.setAttribute(
+    'color',
+    new THREE.BufferAttribute(colors, 3)
+  );
 
+  // Materiali për grimcat
   const material = new THREE.PointsMaterial({
-    vertexColors: true,
-    size: 0.07,
-    map: texture,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false
+    vertexColors: true, // Ngjyrat për grimcat
+    size: 0.05,         // Madhësia e grimcës
+    transparent: true,  // Transparencë e materialit
+    opacity: 1          // Opaciteti fillestar
   });
 
+  // Krijon objektin Points
   const particles = new THREE.Points(geometry, material);
-  particles.userData = { positions, velocities, colors, sizes, count, intensity: 1, targetIntensity: 1 };
-  return particles;
+
+  // Ruaj të dhënat e grimcave në userData për animacionin
+  particles.userData = {
+    positions,      // Array pozicionesh
+    velocities,     // Array shpejtësish
+    colors,         // Array ngjyrash
+    count,          // Numri i grimcave
+    intensity: 1,   // Opaciteti aktual (fade in/out)
+    targetIntensity: 1 // Opaciteti i synuar
+  };
+
+  return particles; // Kthen objektin e grimcave
 }
 
-// Animate fire: flicker, taper, sway, and reset
+/*
+========================================================
+ANIMIMI
+========================================================
+*/
 export function animateFire(particles) {
-  const { positions, velocities, colors, sizes, count } = particles.userData;
 
-  // Smooth intensity fade in/out
-  particles.userData.intensity += (particles.userData.targetIntensity - particles.userData.intensity) * 0.05;
-  particles.material.opacity = particles.userData.intensity;
+  const data = particles.userData;           // Merr të dhënat nga userData
+  const { positions, velocities, colors, count } = data; // Destructuring për qartësi
 
+  // -------------------------------
+  // FADE IN / FADE OUT
+  // -------------------------------
+  // E rrit ose e ul gradualisht opacitetin (exponential smoothing)
+  data.intensity += (data.targetIntensity - data.intensity) * 0.05;
+  particles.material.opacity = data.intensity;
+
+  // Nëse intensity është shumë e vogël, ndalo animacionin për të kursyer CPU
+  if (data.intensity < 0.01) return;
+
+  // -------------------------------
+  // LOOP PËR ÇDO GRIMCË
+  // -------------------------------
   for (let i = 0; i < count; i++) {
-    // Sideways flicker using sine/cosine
-    positions[i*3+0] += velocities[i*3+0] + Math.sin(positions[i*3+1]*20 + i)*0.001;
-    positions[i*3+1] += velocities[i*3+1];
-    positions[i*3+2] += velocities[i*3+2] + Math.cos(positions[i*3+1]*20 + i)*0.001;
 
-    // Dynamic tapering (soft, irregular)
-    positions[i*3+0] *= 1 - Math.pow(positions[i*3+1], 1.5);
-    positions[i*3+2] *= 1 - Math.pow(positions[i*3+1], 1.5);
+    const index = i * 3;
 
-    // Color gradient by height (red → orange → yellow → white)
-    colors[i*3+0] = 1.0;
-    colors[i*3+1] = Math.min(1, 0.5 + positions[i*3+1]*6);
-    colors[i*3+2] = Math.min(0.3, positions[i*3+1]*2);
+    // -------------------------------
+    // LËVIZJA LART
+    // -------------------------------
+    positions[index + 1] += velocities[index + 1] * 0.5; // Faktor 0.5 e ngadalëson
 
-    // Size flicker
-    sizes[i] = 0.06 + Math.random()*0.04;
+    const y = positions[index + 1]; // Ruaj lartësinë aktuale
 
-    // Reset if too high or spread too far
-    if (positions[i*3+1] > 0.18 || Math.abs(positions[i*3+0]) > 0.08 || Math.abs(positions[i*3+2]) > 0.08) {
-      positions[i*3+0] = (Math.random()-0.5)*0.08;
-      positions[i*3+1] = 0;
-      positions[i*3+2] = (Math.random()-0.5)*0.08;
+    // -------------------------------
+    // NGJYRA SIPAS LARTËSISË
+    // -------------------------------
+    // Krijon gradient të thjeshtë: poshtë = e kuqe, lart = portokalli
+    colors[index]     = 1;        // R gjithmonë 1
+    colors[index + 1] = y * 4;    // G rritet sa më lart grimca
+    colors[index + 2] = 0;        // B gjithmonë 0
 
-      velocities[i*3+0] = (Math.random()-0.5)*0.004;
-      velocities[i*3+1] = 0.004 + Math.random()*0.008;
-      velocities[i*3+2] = (Math.random()-0.5)*0.004;
+    // Limitimi i G = 1
+    if (colors[index + 1] > 1) {
+      colors[index + 1] = 1;
+    }
+
+    // -------------------------------
+    // RESET KUR GRIMCA SHKON LART
+    // -------------------------------
+    if (y > 0.18) {
+      // Kthen grimcën në bazë me pozicion të ri rastësor
+      positions[index]     = (Math.random() - 0.5) * 0.15;
+      positions[index + 1] = 0;
+      positions[index + 2] = (Math.random() - 0.5) * 0.15;
     }
   }
 
+  // Njofton Three.js që të përditësojë atributet
   particles.geometry.attributes.position.needsUpdate = true;
   particles.geometry.attributes.color.needsUpdate = true;
 }
 
-// Toggle fire on/off (completely disappears when off)
+/*
+========================================================
+NDEZ / FIK ZJARRIN
+========================================================
+*/
 export function setFireOn(particles, on) {
+  // Ndryshon targetIntensity për fade in / fade out
   particles.userData.targetIntensity = on ? 1 : 0;
-
-  if (!on) {
-    const { positions, velocities, count } = particles.userData;
-    for (let i = 0; i < count; i++) {
-      positions[i*3+0] = (Math.random()-0.5)*0.08;
-      positions[i*3+1] = 0;
-      positions[i*3+2] = (Math.random()-0.5)*0.08;
-
-      velocities[i*3+0] = (Math.random()-0.5)*0.004;
-      velocities[i*3+1] = 0;
-      velocities[i*3+2] = (Math.random()-0.5)*0.004;
-    }
-    particles.geometry.attributes.position.needsUpdate = true;
-  }
 }

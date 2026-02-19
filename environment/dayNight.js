@@ -3,10 +3,10 @@ import * as THREE from 'three';
 import { scene } from '../core/scene.js';
 
 let isDay = true;
-
-/* ----------------------
-   Sun (sphere + light)
-------------------------*/
+//sunLight = dritë drejtuesi (DirectionalLight) → si dielli
+//sun = sfera e verdhë → duket vizualisht
+//Pozicioni = ku ndriçon dielli
+//castShadow = true → dielli bën hije
 const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
 sunLight.position.set(5, 8, 5);
 sunLight.castShadow = true;
@@ -22,6 +22,7 @@ scene.add(sun);
 /* ----------------------
    Moon (sphere + light)
 ------------------------*/
+//Fillon e fshehur (visible=false) → shfaqet vetëm natën
 const moonLight = new THREE.DirectionalLight(0x8899ff, 0.3);
 moonLight.position.set(-5, 6, -5);
 moonLight.castShadow = true;
@@ -39,36 +40,43 @@ scene.add(moon);
 /* ----------------------
    Ambient light
 ------------------------*/
+//Dritë që ndriçon gjithçka njësoj
+//Intensitet ndryshon ditën dhe natën
 const ambient = new THREE.AmbientLight(0xffffff, 0.4);
 scene.add(ambient);
 
 /* ----------------------
    Stars
 ------------------------*/
-const starsCount = 200;
-const starsGeometry = new THREE.BufferGeometry();
-const starsPositions = new Float32Array(starsCount * 3);
-const starsBrightness = new Float32Array(starsCount);
+const starsCount = 200; //kemi 200 yje
+const starsGeometry = new THREE.BufferGeometry();//për të ruajtur koordinatat e objekteve 3D qe mos krijohet mesh per secilin yll por krejt e perfdorin gjeometirin e njejt
+const starsPositions = new Float32Array(starsCount * 3);//Çdo yll ka 3 koordinata: x, y, z → prandaj starsCount * 3.,float i ruan numrat me precizitet te lart
+const starsBrightness = new Float32Array(starsCount);//Ruajmë intensitetin e secilit yll për ta bërë të shkëlqejë (flicker).
 
 for (let i = 0; i < starsCount; i++) {
-  starsPositions[i*3+0] = (Math.random()-0.5)*50;
-  starsPositions[i*3+1] = Math.random()*20 + 10;
-  starsPositions[i*3+2] = (Math.random()-0.5)*50;
+  starsPositions[i*3+0] = (Math.random()-0.5)*50;//x
+  starsPositions[i*3+1] = Math.random()*20 + 10;//y
+  starsPositions[i*3+2] = (Math.random()-0.5)*50;//z
+  //X dhe Z = (Math.random()-0.5)*50 → rastësisht nga -25 deri +25 → shpërndarje horizontale.
+// Y = Math.random()*20 + 10 → rastësisht nga 10 deri 30 → lartësi, për të mos qenë poshtë “tokës”.
+// starsBrightness[i] = Math.random() → numër midis 0 dhe 1 → për flicker.
   starsBrightness[i] = Math.random(); // for flicker
 }
+// BufferAttribute = lidhet me BufferGeometry
 
+// 3 = sepse secila pika ka x,y,z
 starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPositions, 3));
 
 const starsMaterial = new THREE.PointsMaterial({
-  color: 0xffffff,
+  color: 0xffffff,// i bardhë
   size: 0.15,
   transparent: true,
   opacity: 0.8,
 });
-
+//THREE.Points = një grumbull pikash në 3D.Të gjithë yjet tani janë një objekt, jo 200 mesh individual.
 const stars = new THREE.Points(starsGeometry, starsMaterial);
-stars.userData = { brightness: starsBrightness };
-stars.visible = false;
+stars.userData = { brightness: starsBrightness };//Ruajmë vlerat e flicker për përdorim në animim.userData = mënyra Three.js për të ruajtur të dhëna shtesë tek objekti.
+stars.visible = false;//naten sjan visible
 scene.add(stars);
 
 /* ----------------------
@@ -111,7 +119,7 @@ dayButton.style.padding = "6px 10px"; // smaller
 dayButton.style.fontSize = "14px";
 document.body.appendChild(dayButton);
 
-dayButton.addEventListener('click', toggleDayNight);
+dayButton.addEventListener('click', toggleDayNight);//Kur klikohet → thërret funksionin toggleDayNight()
 
 /* ----------------------
    Animate Stars

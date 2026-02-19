@@ -66,12 +66,10 @@ window.addEventListener('resize', () => {
 const clock = new THREE.Clock();
 
 
-// loadCat((cat) => {
-//   scene.add(cat);
-// });
+
 initKitchen();
 loadCat((cat) => {
-  scene.add(cat)                        // MUST add cat to the scene first
+  scene.add(cat)                   
   enableCatInteraction(camera, renderer.domElement)
 })
 
@@ -82,9 +80,7 @@ loadCoffeeSetup(scene, camera, renderer);
 
 initLampSystem(camera, renderer);
 
-// const dust = createDust(150); // 150 dust particles
-// scene.add(dust);
-// Load everything in nested callbacks
+
 
 /* ------------------ ANIMATE LOOP ------------------ */
 function animate() {
@@ -105,9 +101,8 @@ function animate() {
   animateFire(fire);               // our toggleable fireplace
   updateCat(delta);
    updateSteam(delta);
-   updateSteam(delta);
    animateLamps(delta);
-  // animateDust(dust);
+ 
 
    
   controls.update();
@@ -118,6 +113,22 @@ function animate() {
 }
 
 animate();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

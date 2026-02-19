@@ -137,3 +137,18 @@ export function animateLamps(delta) {
     l.light.intensity += (target - l.light.intensity) * delta * 8
   })
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
